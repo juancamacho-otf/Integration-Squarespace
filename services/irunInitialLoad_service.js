@@ -86,7 +86,10 @@ const processCustomerOrders = async (contactEmail, hubspotContactId, transaction
                 hubspotProperties: orderProperties,
                 associations: []
             });
-            const hubspotOrderId = orderResult?.results?.[0]?.id || orderResult?.id;
+            
+            const orderObj = orderResult?.results?.[0] || orderResult;
+            const hubspotOrderId = orderObj?.id;
+            const isNewOrder = orderObj?.createdAt === orderObj?.updatedAt;
 
             if (hubspotOrderId) {
                 await hubspotService.createAssociationV4('contacts', hubspotContactId, 'orders', hubspotOrderId).catch(() => {});
@@ -106,7 +109,7 @@ const processCustomerOrders = async (contactEmail, hubspotContactId, transaction
                 if (hubspotOrderId) await hubspotService.createAssociationV4('orders', hubspotOrderId, 'deals', hubspotDealId).catch(() => {});
             }
 
-            if (lineItemsData && lineItemsData.length > 0 && hubspotOrderId) {
+            if (isNewOrder && lineItemsData && lineItemsData.length > 0 && hubspotOrderId) {
                 const lineItemAssociations = [{ to: { id: hubspotOrderId }, types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 514 }] }];
                 const lineItemProps = ["name", "price", "quantity", "hs_sku", "sqsp_lineitm_variant"];
                 await hubspotService.createLineItems({ propertiesArr: lineItemProps, lineItemArr: lineItemsData, associationsArr: lineItemAssociations }).catch(() => {});

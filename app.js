@@ -27,7 +27,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, async () => {
-  console.log(`🚀 Server running @ http://localhost:${PORT}`);
+  console.log(`🚀 Server running in port:${PORT}`);
 
   await integrationService.initializeCheckpoint();
 

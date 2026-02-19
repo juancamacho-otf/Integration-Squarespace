@@ -91,7 +91,11 @@ const processSingleOrder = async (order) => {
             hubspotProperties: dealProperties,
             associations: []
         });
-        const hubspotDealId = dealResult?.results?.[0]?.id || dealResult?.id;
+        
+        // Agregamos la lógica para detectar si el Deal es nuevo
+        const dealObj = dealResult?.results?.[0] || dealResult;
+        const hubspotDealId = dealObj?.id;
+        const isNewDeal = dealObj?.createdAt === dealObj?.updatedAt;
 
         if (hubspotDealId) {
             try {
@@ -108,10 +112,11 @@ const processSingleOrder = async (order) => {
                 }
             }
 
-            if (lineItemsData && lineItemsData.length > 0) {
+            // Agregamos la validación isNewDeal aquí
+            if (isNewDeal && lineItemsData && lineItemsData.length > 0) {
                 const lineItemAssociations = [{ 
                     to: { id: hubspotDealId }, 
-                    types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 19 }] 
+                    types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 20 }] 
                 }];
                 
                 const lineItemProps = ["name", "price", "quantity", "hs_sku", "sqsp_lineitm_variant"];

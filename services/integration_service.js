@@ -89,7 +89,10 @@ const processCustomerOrders = async (contactEmail, hubspotContactId, transaction
                 hubspotProperties: orderProperties,
                 associations: []
             });
-            const hubspotOrderId = orderResult?.results?.[0]?.id || orderResult?.id;
+            
+            const orderObj = orderResult?.results?.[0] || orderResult;
+            const hubspotOrderId = orderObj?.id;
+            const isNewOrder = orderObj?.createdAt === orderObj?.updatedAt;
 
             if (hubspotOrderId) {
                 try {
@@ -124,7 +127,7 @@ const processCustomerOrders = async (contactEmail, hubspotContactId, transaction
                 }
             }
 
-            if (lineItemsData && lineItemsData.length > 0 && hubspotOrderId) {
+            if (isNewOrder && lineItemsData && lineItemsData.length > 0 && hubspotOrderId) {
                 const lineItemAssociations = [{ to: { id: hubspotOrderId }, types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 514 }] }];
                 const lineItemProps = ["name", "price", "quantity", "hs_sku", "sqsp_lineitm_variant"];
                 try {
