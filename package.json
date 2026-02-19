@@ -1,0 +1,27 @@
+{
+  "name": "shopvox_integration",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node --watch app.js",
+    "dev": "nodemon app.js",
+    "tests": "nodemon ./tests/function_test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@hubspot/api-client": "^11.1.0",
+    "axios": "^1.13.2",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "http-errors": "^2.0.0",
+    "mongoose": "^8.19.2",
+    "morgan": "^1.10.0",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
