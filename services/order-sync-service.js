@@ -84,7 +84,8 @@ const processSingleOrder = async (order) => {
             }
         }
 
-        const dealProperties = Object.keys(dealData).filter(k => k !== 'temporary_id');
+        // --- CORRECCIÓN AQUÍ: Usamos exactamente el mismo filtro de la migración ---
+        const dealProperties = Object.keys(dealData).filter(k => k !== 'temporary_id' && k !== 'payment_reference' && k !== 'hs_payment_processing_method');
         const dealResult = await hubspotService.upsertDeal({
             searchProperty: 'dealname',
             dealObject: dealData,
@@ -92,10 +93,17 @@ const processSingleOrder = async (order) => {
             associations: []
         });
         
-        // Agregamos la lógica para detectar si el Deal es nuevo
         const dealObj = dealResult?.results?.[0] || dealResult;
         const hubspotDealId = dealObj?.id;
-        const isNewDeal = dealObj?.createdAt === dealObj?.updatedAt;
+
+        let isNewDeal = false;
+        if (dealObj?.createdAt && dealObj?.updatedAt) {
+            const createdTime = new Date(dealObj.createdAt).getTime();
+            const updatedTime = new Date(dealObj.updatedAt).getTime();
+            isNewDeal = Math.abs(updatedTime - createdTime) < 2000;
+        } else if (dealObj?.createdAt && !dealObj?.updatedAt) {
+            isNewDeal = true;
+        }
 
         if (hubspotDealId) {
             try {
@@ -112,7 +120,6 @@ const processSingleOrder = async (order) => {
                 }
             }
 
-            // Agregamos la validación isNewDeal aquí
             if (isNewDeal && lineItemsData && lineItemsData.length > 0) {
                 const lineItemAssociations = [{ 
                     to: { id: hubspotDealId }, 

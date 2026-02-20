@@ -89,7 +89,15 @@ const processCustomerOrders = async (contactEmail, hubspotContactId, transaction
             
             const orderObj = orderResult?.results?.[0] || orderResult;
             const hubspotOrderId = orderObj?.id;
-            const isNewOrder = orderObj?.createdAt === orderObj?.updatedAt;
+
+            let isNewOrder = false;
+            if (orderObj?.createdAt && orderObj?.updatedAt) {
+                const createdTime = new Date(orderObj.createdAt).getTime();
+                const updatedTime = new Date(orderObj.updatedAt).getTime();
+                isNewOrder = Math.abs(updatedTime - createdTime) < 2000;
+            } else if (orderObj?.createdAt && !orderObj?.updatedAt) {
+                isNewOrder = true;
+            }
 
             if (hubspotOrderId) {
                 await hubspotService.createAssociationV4('contacts', hubspotContactId, 'orders', hubspotOrderId).catch(() => {});
